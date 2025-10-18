@@ -30,7 +30,7 @@ function frequency(pitch) {
 function handle() {
     audioCtx.resume();
     gainNode.gain.value = 0;
-    mapName.get(key)
+    notenames.get(Map);
     var usernotes = String(input.value);
     console.log(input.value);
     frequency(notenames.get(usernotes));
