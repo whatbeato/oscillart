@@ -3,6 +3,37 @@ const audioCtx = new AudioContext();
 const gainNode = audioCtx.createGain();
 console.log("1")
 
+// canvas stuff
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var width = ctx.canvas.width;
+var height = ctx.canvas.height;
+freq = pitch / 10000;
+var amplitude = 40;
+var interval = null;
+
+var counter = 0;
+function drawWave() {
+    ctx.clearRect(0, 0, width, height);
+    x = 0
+    y = height/2;
+    ctx.moveTo(x,y);
+    ctx.beingPath();
+    counter = 0;
+    counter++;
+    interval = setInterval(line, 20);
+    if(counter > 50) {
+        clearInterval(interval);
+    }
+}
+
+function line() {
+    y = height/2 + (amplitude * Math.sin(x * 2 * Math.PI * freq));
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    x = x + 1;
+}
+
 const oscillator = audioCtx.createOscillator();
 oscillator.connect(gainNode);
 gainNode.connect(audioCtx.destination);
