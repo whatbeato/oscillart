@@ -1,6 +1,7 @@
 const input = document.getElementById('input');
 const color_picker = document.getElementById('color');
 const vol_slider = document.getElementById('vol-slider');
+const type_sound = document.getElementById('type-selector')
 const audioCtx = new AudioContext();
 const gainNode = audioCtx.createGain();
 console.log("1")
@@ -55,7 +56,7 @@ function line() {
 const oscillator = audioCtx.createOscillator();
 oscillator.connect(gainNode);
 gainNode.connect(audioCtx.destination);
-oscillator.type = "sine";
+oscillator.type = type_sound;
 
 oscillator.start();
 gainNode.gain.value = 0;
