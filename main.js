@@ -1,4 +1,6 @@
 const input = document.getElementById('input');
+const color_picker = document.getElementById('color');
+const vol_slider = document.getElementById('vol-slider');
 const audioCtx = new AudioContext();
 const gainNode = audioCtx.createGain();
 console.log("1")
@@ -8,27 +10,43 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var width = ctx.canvas.width;
 var height = ctx.canvas.height;
-freq = pitch / 10000;
+var freq = 0;
 var amplitude = 40;
 var interval = null;
+var x = 0;
+var y = height/2;
+var reset = true;
+var timpernote = 0;
+var length = 0;
 
 var counter = 0;
 function drawWave() {
-    ctx.clearRect(0, 0, width, height);
-    x = 0
-    y = height/2;
-    ctx.moveTo(x,y);
-    ctx.beingPath();
-    counter = 0;
-    counter++;
-    interval = setInterval(line, 20);
-    if(counter > 50) {
-        clearInterval(interval);
+    clearInterval(interval);
+    if (reset) {
+        ctx.clearRect(0, 0, width, height);
+        x = 0;
+        y = height/2;
+        reset = false;  // Set reset to false after first clear
     }
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    
+    counter = 0;
+    interval = setInterval(() => {
+        if (x < width) {  
+            line();
+            counter++;
+        } else {
+            clearInterval(interval);
+            reset = true;  // Set reset to true when done
+        }
+    }, 20);
 }
 
 function line() {
-    y = height/2 + (amplitude * Math.sin(x * 2 * Math.PI * freq));
+    y = height/2 + amplitude * Math.sin(x * freq * 0.05);  // Adjusted frequency multiplier
+    ctx.strokeStyle = color_picker.value;
     ctx.lineTo(x, y);
     ctx.stroke();
     x = x + 1;
@@ -52,17 +70,40 @@ notenames.set("A", 440);
 notenames.set("B", 493.9);
 
 function frequency(pitch) {
-    gainNode.gain.setValueAtTime(100, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(vol_slider.value / 100, audioCtx.currentTime);
     oscillator.frequency.setValueAtTime(pitch, audioCtx.currentTime);
-    gainNode.gain.setValueAtTime(0, audioCtx.currentTime + 1);
-};
-
+    setTimeout(() => { gainNode.gain.value = 0; }, timpernote - 10);
+    freq = pitch / 100;  // Changed from 1000 to 100 for better oscillation
+    drawWave();
+}
 
 function handle() {
     audioCtx.resume();
     gainNode.gain.value = 0;
-    notenames.get(Map);
     var usernotes = String(input.value);
-    console.log(input.value);
-    frequency(notenames.get(usernotes));
+    var noteslist = [];
+    length = usernotes.length;
+    timpernote = (3000 / length);
+    console.log("Playing notes:", input.value);
+    console.log("Time per note:", timpernote);
+    
+    for (let i = 0; i < usernotes.length; i++) {
+        let note = notenames.get(usernotes.charAt(i).toUpperCase());
+        if (note) {
+            noteslist.push(note);
+        }
+    }
+    
+    console.log("Notes to play:", noteslist);
+    
+    let j = 0;
+    let repeat = setInterval(() => {
+        if (j < noteslist.length) {
+            console.log("Playing note", j, ":", noteslist[j]);
+            frequency(noteslist[j]);
+            j++;
+        } else {
+            clearInterval(repeat);
+        }
+    }, timpernote);
 }
