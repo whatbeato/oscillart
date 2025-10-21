@@ -1,7 +1,8 @@
 const input = document.getElementById('input');
 const color_picker = document.getElementById('color');
 const vol_slider = document.getElementById('vol-slider');
-const type_sound = document.getElementById('type-selector')
+const type_sound = document.getElementById('type-selector');
+const recording_toggle = document.getElementById('record');;
 const audioCtx = new AudioContext();
 const gainNode = audioCtx.createGain();
 console.log("1")
@@ -24,7 +25,6 @@ var blob, recorder = null;
 var chunks = [];
 
 function startRecording(){
-    recorder.start();
    const canvasStream = canvas.captureStream(20);
    const combinedStream = new MediaStream();
    const audioDestination = audioCtx.createMediaStreamDestination();
@@ -46,12 +46,22 @@ function startRecording(){
         a.download = 'recording.webm';
         a.click();
         URL.revokeObjectURL(url);
+        chunks = []; 
     };
+    
+    recorder.start(); 
 }
 
 var is_recording = false;
-function toggle(){
-
+function toggle() {
+   is_recording = !is_recording; 
+   if(is_recording){
+       recording_toggle.innerHTML = "Stop Recording";
+       startRecording(); 
+   } else {
+       recording_toggle.innerHTML = "Start Recording";
+       recorder.stop();
+   }
 }
 
 var counter = 0;

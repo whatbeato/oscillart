@@ -4,3 +4,15 @@
     width: 900px;
     margin-bottom: 2em;
 }
+
+body {
+    background-color: antiquewhite;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+    color: rgb(109, 109, 255);
+    font-family: monospace
+}
