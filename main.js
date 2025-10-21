@@ -6,7 +6,7 @@ const audioCtx = new AudioContext();
 const gainNode = audioCtx.createGain();
 console.log("1")
 
-// canvas stuff
+// var this, var that...
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var width = ctx.canvas.width;
@@ -20,18 +20,52 @@ var reset = true;
 var timpernote = 0;
 var length = 0;
 
+var blob, recorder = null;
+var chunks = [];
+
+function startRecording(){
+    recorder.start();
+   const canvasStream = canvas.captureStream(20);
+   const combinedStream = new MediaStream();
+   const audioDestination = audioCtx.createMediaStreamDestination();
+   gainNode.connect(audioDestination);
+   canvasStream.getVideoTracks().forEach(track => combinedStream.addTrack(track));
+   audioDestination.stream.getAudioTracks().forEach(track => combinedStream.addTrack(track));
+   recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
+   recorder.ondataavailable = e => {
+    if (e.data.size > 0) {
+        chunks.push(e.data);
+        }
+    };
+
+    recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'recording.webm';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+}
+
+var is_recording = false;
+function toggle(){
+
+}
+
 var counter = 0;
 function drawWave() {
     clearInterval(interval);
-    if (reset) {
+    // Only reset x if we've reached the end of the canvas
+    if (x >= width) {
         ctx.clearRect(0, 0, width, height);
         x = 0;
         y = height/2;
-        reset = false;  // Set reset to false after first clear
+        ctx.beginPath();
+        ctx.moveTo(x, y);
     }
-    
-    ctx.beginPath();
-    ctx.moveTo(x, y);
+    // If we're in the middle, just continue from current position
     
     counter = 0;
     interval = setInterval(() => {
@@ -40,7 +74,6 @@ function drawWave() {
             counter++;
         } else {
             clearInterval(interval);
-            reset = true;  // Set reset to true when done
         }
     }, 20);
 }
@@ -83,6 +116,15 @@ console.log("okay uh")
 type_sound.addEventListener('change', () => {
     oscillator.type = type_sound.value;
     console.log("Oscillator type changed to:", type_sound.value);
+});
+
+vol_slider.addEventListener('input', () => {
+    amplitude = (vol_slider.value / 100) * 40; // Scale amplitude based on slider (0-40)
+    console.log("Amplitude changed to:", amplitude);
+    // Redraw the current wave with new amplitude
+    if (freq > 0) {
+        drawWave();
+    }
 });
 
 notenames = new Map();
