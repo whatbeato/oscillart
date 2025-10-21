@@ -16,3 +16,9 @@ body {
     color: rgb(109, 109, 255);
     font-family: monospace
 }
+
+input, button, select {
+    border-radius: 10px;
+    background-color: wheat;
+    font-size: large;
+}
