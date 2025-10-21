@@ -46,7 +46,25 @@ function drawWave() {
 }
 
 function line() {
-    y = height/2 + amplitude * Math.sin(x * freq * 0.05);  // Adjusted frequency multiplier
+    let phase = (x * freq * 0.05) % (Math.PI * 2);
+    let waveValue;
+
+    switch(type_sound.value) {
+        case 'sine':
+            waveValue = Math.sin(phase);
+            break;
+        case 'triangle':
+            waveValue = (2 / Math.PI) * Math.asin(Math.sin(phase));
+            break;
+        case 'square':
+            waveValue = Math.sin(phase) >= 0 ? 1 : -1;
+            break;
+        case 'sawtooth':
+            waveValue = 2 * ((phase / (Math.PI * 2)) - Math.floor((phase / (Math.PI * 2)) + 0.5));
+            break;
+    }
+
+    y = height/2 + amplitude * waveValue;
     ctx.strokeStyle = color_picker.value;
     ctx.lineTo(x, y);
     ctx.stroke();
@@ -56,11 +74,16 @@ function line() {
 const oscillator = audioCtx.createOscillator();
 oscillator.connect(gainNode);
 gainNode.connect(audioCtx.destination);
-oscillator.type = type_sound;
+oscillator.type = type_sound.value;
 
 oscillator.start();
 gainNode.gain.value = 0;
 console.log("okay uh")
+
+type_sound.addEventListener('change', () => {
+    oscillator.type = type_sound.value;
+    console.log("Oscillator type changed to:", type_sound.value);
+});
 
 notenames = new Map();
 notenames.set("C", 261.6);
